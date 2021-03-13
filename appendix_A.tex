@@ -1,0 +1,47 @@
+\chapter{Derivation of Kalman Filtering Equations from Bayes' Rule}
+
+In this appendix we derive the Kalman filtering equations directly from Bayes rule. The first step is to derive the projected covariance,
+\begin{align}
+    \E[\hat{x}_{t+1}\hat{x}_{t+1}^T] &= \E[(Ax + Bu + \omega)(Ax + Bu + \omega)^T] \\
+    &= \E[Ax x^TA^T] + \E[Ax u^TB^T] + \E[Ax\omega^T] + \E[Bu x^TA^T] + \E[Bu\omega^T] + \E[\omega_x^T A^T] \\ &+ \E[\omega U^TB^T] + \E[\omega\omega^T] \\
+    &= A \E[xx^T]A^T + \E[\omega\omega^T] \\
+    &= A\Sigma_x(t)A^T + \Sigma_\omega 
+\end{align}
+Step 11 uses the fact that matrices A,B are constant so come out of the expectation operator, and that it is assumed that covariances between the state, the noise, and the control -- $\E[x u^T]$,$\E[x\omega^T]$, $\E[u\omega^T]$ -- are 0. Step 13 uses the fact that $\E[xx^T] = \Sigma_x(t)$ and that $\E[\omega\omega^T] = \Sigma_\omega$.
+
+Next we optimize the following loss function, derived from Bayes' rule above (equation 5).
+\begin{flalign}
+     L &= -(y - C\mu_{t+1})^T\Sigma_Z(y - C\mu_{t+1}) + (\mu_{t+1} - A\mu_t - Bu_t)^T\hat{\Sigma}_x(\mu_{t+1} - A\mu_t - Bu_t) &
+\end{flalign}
+To obtain the Kalman estimate for $\mu_{t+1}$ we simply take derivatives of the loss, set it to zero and solve analytically.
+\begin{flalign}
+    0 &= \frac{dL}{d\mu_{t+1}}[\mu_{t+1}^T[C^T RC + \Sigma_x]\mu_{t+1} - \mu_{t+1}^T[C^T Ry - \Sigma_x A\mu_t - \Sigma_x Bu_t] \\ &- [y^TR - \mu_t^TA^T\Sigma_x - u_t^TB^T \Sigma_x]\mu_{t+1} \\
+    &= 2[C^T RC + \Sigma_x]\mu_{t+1} - 2[C^T Ry + \Sigma_x (A \mu_t + Bu_t)] \\
+    \mu_{t+1} &= [C^T RC + \Sigma_x^{-1}[C^T Ry + \Sigma_x (A \mu_t + Bu_t] \\
+    &= [\Sigma_x^{-1} - \Sigma_x^{-1}C^T[C\Sigma_x C^T + R]^{-1}C\Sigma_x^{-1}[C^T Ry + \Sigma_x (A \mu_t + Bu_t)] \\
+    &= [\Sigma_x^{-1} - KC\Sigma_x^{-1}][C^T Ry + \Sigma_x (A \mu_t + Bu_t)] \\
+    &= A\mu_t + Bu_t + \Sigma_x^{-1}C^T Ry - KC\Sigma_x^{-1}C^T Ry - KC(A\mu_t + Bu_t) \\
+    &= \hat{\mu_{t+1}} - KC\hat{\mu_{t+1}} + [\Sigma_x^{-1}C^TR - KC\Sigma_x^{-1}C^TR]y \\
+    &= \hat{\mu_{t+1}} - KC\hat{\mu_{t+1}} + K K^{-1}[\Sigma_x^{-1}C^TR - KC\Sigma_x^{-1}C^TR]y \\
+    &= \hat{\mu_{t+1}} - KC\hat{\mu_{t+1}} + K[(C\Sigma_x C^T + R)C^{-T}\Sigma_x[\Sigma_x^{-1}C^TR] - C\Sigma_x C^T R]y \\
+    &= \hat{\mu_{t+1}} - KC\hat{\mu_{t+1}} + K[(C\Sigma_x C^T + R^{-1})R - C\Sigma_x C^T R]y \\
+    &= \hat{\mu_{t+1}} - KC\hat{\mu_{t+1}} + Ky \\
+    &= \hat{\mu_{t+1}} + K[y-C\hat{\mu_{t+1}}]
+\end{flalign}
+Where $K =\Sigma_x^{-1}C^T[C \Sigma_x C^T + R]^{-1}$ and is the Kalman gain and $\hat{\mu_{t+1}} = A \mu_t + Bu_t$ is the projected mean. 
+
+The first few steps rearrange the loss function into a convenient form and then derive an expression for $\mu_{t+1}$ directly. Step 22 applies the Woodbury matrix inversion lemma to the $[C^TRC + \Sigma_x]^{-1}$ term. The next step rewrites the formula in terms of the Kalman gain matrix K and  multiplies it through. The other major manipulation is the multiplication of the last term of equation 23 by $KK^{-1}$ which is valid since $KK^{-1} = I$.
+
+This derives the optimal posterior mean as the analytical solution to the optimization problem. Deriving the optimal covariance is straightforward and done as follows,
+
+\begin{align}
+    \E[\mu_{t+1} \mu_{t+1}^T] &= \E[(\hat{mu_{t+1}} + Ky - KC\hat{mu_{t+1}})(\hat{\mu_{t+1}} + Ky - KC\hat{\mu_{t+1}})^T] \\
+    &= \E[\hat{\mu_{t+1}}\hat{\mu_{t+1}}^T] - \E[\hat{\mu_{t+1}}\hat{\mu_{t+1}}^T]C^T K^T - K C \E[\hat{\mu_{t+1}}\hat{\mu_{t+1}}^T] \\ &+ K \E[y y^T]K^T + K C \E[\hat{\mu_{t+1}}\hat{\mu_{t+1}}^T]C^T K^T \\
+    &= \Sigma_{\hat{\mu_{t+1}}} - \Sigma_{\hat{\mu_{t+1}}} C^T K^T - KC \Sigma_{\hat{\mu_{t+1}}} + K[R + C\Sigma_{\hat{\mu_{t+1}}}C^T]K^T \\
+   &=  \Sigma_{\hat{\mu_{t+1}}} - \Sigma_{\hat{\mu_{t+1}}} C^T K^T - KC \Sigma_{\hat{\mu_{t+1}}} + \Sigma_{\hat{\mu_{t+1}}}C^T[C\Sigma_{\hat{\mu_{t+1}}}C^T +R]^{-1}[R + C\Sigma_{\hat{\mu_{t+1}}}C^T]K^T \\
+   &= \Sigma_{\hat{\mu_{t+1}}} - \Sigma_{\hat{\mu_{t+1}}} C^T K^T - KC \Sigma_{\hat{\mu_{t+1}}} +  \Sigma_{\hat{\mu_{t+1}}} C^T K^T \\
+   &= \Sigma_{\hat{\mu_{t+1}}} - KC \Sigma_{\hat{\mu_{t+1}}} \\
+   &= [I - KC]\Sigma_{\hat{\mu_{t+1}}}
+\end{align}
+
+Which is the Kalman update equation for the optimal variance. The second line follows on the assumption that $\E[x y^T] = 0$. On equation 32 the definition of the Kalman gain is substituted back in and the two $C\Sigma_x C^T + R$ terms cancel.
