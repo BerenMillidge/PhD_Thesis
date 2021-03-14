@@ -413,8 +413,7 @@ Similar to our previous approach described earlier, we propose to develop deep a
 
 Specifically, and quite elegantly, we can show that under certain conditions of the generative model of the future, that we can derive the optimal plan as a softmax over the expected free energy in the future, (which was merely assumed to be the action prior in the model-free case). Moreover, we then show that this path integral can be approximated by monte-carlo sampling in the form of a model-based planning algorithm which samples and evaluates given potential future trajectories using the transition and reward models possessed by the agent.
 
-\begin{equation}
-   \begin{aligned}
+\begin{align*}
           \mathcal{\tilde{F}}_{\pi} &= \KL \Big( q(o_t, x_t, \theta , \pi ) \Vert \tilde{p}(o_t, x_t, \theta) \Big) \\
          &= \mathbb{E}_{q(o_t, x_t, \theta ,\pi)}[\log q(o_t, x_t, \theta |\pi) + \log q(\pi) - \log \tilde{p}(o_t, x_t, \theta,  \pi)] \\
          &=  \mathbb{E}_{q(\pi)} \Big[ \mathbb{E}_{q(o_t, x_t, \theta| \pi)}[ \log q(\pi) - [\log \tilde{p}(o_t, x_t, \theta) - \log q(o_t, x_t, \theta |\pi)]\Big] \\
@@ -423,9 +422,8 @@ Specifically, and quite elegantly, we can show that under certain conditions of 
          &= \mathbb{E}_{q(\pi)} \Big[\log q(\pi) - \log e^{- \big[-\mathbb{E}_{q(o_t, x_t, \theta| \pi)}[\log q(o_t, x_t, \theta |\pi) - \log \tilde{p}(o_t, x_t, \theta)]\big]} \Big] \\
          &= \mathbb{E}_{q(\pi)} \Big[\log q(\pi) - \log e^{-\KL \big( q(o_t, x_t, \theta | \pi) \Vert \tilde{p}(o_t, x_t, \theta) \big)}\Big] \\
          &= \KL \Big( q(\pi)  \Vert  e^{- \KL \big( q(o_t, x_t, \theta | \pi) \Vert \tilde{p}(o_t, x_t, \theta) \big)} \Big) \\
-         &= \KL \Big( q(\pi)  \Vert  e^{-\mathcal{\tilde{F_{\pi}}}} \Big) \numberthis
-\end{aligned}
-\end{equation}
+         &= \KL \Big( q(\pi)  \Vert  e^{-\mathcal{\tilde{F}_{\pi}}} \Big) \numberthis
+\end{align*}
 
 It is important to note that here we do not use the expected free energy as our objective, unlike in standard active inference. Instead, we use the recently introduced objective: the free energy of the expected future (FEEF). This objective maintains the exploratory information gain terms of the traditional expected free energy while possessing a clear mathematical origin with strong intuitive grounding. Specifically, the FEEF can be defined as
 
@@ -490,7 +488,6 @@ To compute actions we used a model-based planner (CEM) \citep{rubinstein1997opti
 We tested the performance of our algorithm against strong model-free and model-based baselines on a number of challenging control tasks. We utilized first the mountain-car task from OpenAI Gym, which requires the agent to steer a car on a 1D line to a goal. This task is difficult because the agent must first move the car away from the goal up a hill, to build up momentum to be able to get over the larger hill. This poses a difficult exploration problem which purely random exploration agents struggle to solve. By contrast, our agent can solve this task instantaneously, within only a single episode, due to its goal directed exploration.
 
 \begin{figure}[h]
-   \label{fig:a}
    \centering 
       \includegraphics[width=15cm]{chapter_4_figures/RLAI_performance.pdf}
       \caption{\textbf{(A) Mountain Car:} Average return after each episode on the sparse-reward Mountain Car task. Our algorithm achieves optimal performance in a single trial. \textbf{(B) Cup Catch:} Average return after each episode on the sparse-reward Cup Catch task. Here, results amongst algorithms are similar, with all agents reaching asymptotic performance in around 20 episodes. \textbf{(C \& D) Half Cheetah:} Average return after each episode on the well-shaped Half Cheetah environment, for the running and flipping tasks, respectively. We compare our results to the average performance of SAC after 100 episodes learning, demonstrating our algorithm can perform successfully in environments which do not require directed exploration. Each line is the mean of 5 seeds and filled regions show +/- standard deviation.}
@@ -499,7 +496,6 @@ We tested the performance of our algorithm against strong model-free and model-b
 Since the mountain car environment possesses only a two dimensional state space, we can explicitly plot and compare the degree of the space covered by the active inference agent vs the greedy reward maximizing reinforcement learning agent.
 
 \begin{figure}[h]
-   \label{fig:b}
    \centering 
    \includegraphics[width=12cm, height=4cm]{chapter_4_figures/RLAI_figure_two.pdf}
 \caption{\textbf{(A \& B) Mountain Car state space coverage}: We plot the points in state-space visited by two agents - one that minimizes the free energy of the expected future (FEEF) and one that maximises reward. The plots are from 20 episodes and show that the FEEF agent searches almost the entirety of state space, while the reward agent is confined to a region that be reached with random actions. \textbf{(C) Ant Maze Coverage}: We plot the percentage of the maze covered after 35 episodes, comparing the FEEF agent to an agent acting randomly. These results are the average of 4 seeds.}
@@ -646,12 +642,11 @@ While we are the first to consider the combination of amortised and iterative in
 We tested our hybrid agent first on a didactic toy continuous control task. The goal of this task was to simply explore how the iterative and amortised control schemes interact. The environment was a simple 2-D planar environment, where the agent began in the bottom-left corner, and where the goal was to arrive in the top-right corner. The reward signal was a smooth gradient field leading to the top-right which was implemented as $r(x,y) = 1 - (|| (x,y) - (g_x, g_y) ||^2)$ where $g_x$ and $g_y$ represent the x and y coordinates of the goal state. In the centre of the environment there was an impassable wall except for a small opening through which the agent could pass. The agent could control its x and y velocity -- $a = (\dot{x}, \dot{y})$ with a maximum velocity of 0.05 and a minimum velocity of -0.05.
 
 \begin{figure*}[t!]
-\label{hybrid_performance_figure}
   \centering
   \includegraphics[width=\textwidth]{chapter_4_figures/CHI_figure_one_edit.pdf}
   \caption{\textbf{(a - c)}: Amortised predictions of $q_{\phi}(a|s; \theta)$ are shown in red, where $\bullet$ denote the expected states, shaded areas denote the predicted actions variance at each step, and the expected trajectory recovered by iterative inference is shown in blue.
   At the onset of learning (\textbf{a}), the amortised predictions are highly uncertain, and thus have little influence on the final approximate posterior. As the amortised model $f_{\phi}(\cdot)$ learns (\textbf{b}), the certainty of the amortised predictions increase, such that the final posterior remains closer to the initial amortised guess. At convergence, (\textbf{c}), the iterative phase of inference has negligible influence on the final distribution, suggesting convergence to a model-free algorithm. \textbf{(d)} Here, we compare our algorithm to its constituent components -- the soft-actor critic (SAC) and an MPC algorithm based on the cross-entropy method (CEM). These results demonstrate that the hybrid model significantly outperforms both of these methods.}
-  \label{fig:two}
+\label{hybrid_performance_figure}
 \end{figure*}
 
 The graph shows the evolution of the agent's iterative and amortised policies as it learns to complete the task. As can be seen, the iterative policy starts out highly uncertain, with a high variance. As the amortised policy is slowly learnt, the variance of the iterative policy shrinks, and the resulting policy closely matches the amortised policies. This immediately suggests an adaptive method of saving computation -- when the variance of the iterative policy is small, or the iterative policy is very close to the amortised policy, rely solely on the computationally cheap amortised policy only. Conversely, when the amortised policy or the iterative policy is highly uncertain (as at the beginning of training), then the computationally expensive model-predictive-control of the iterative policy should be utilized. In this way, the agent can attain the impressive sample efficiency and rapid performance of model-based planning at the beginning of training, when the amortised policy is poor, but then once the amortised policy becomes good, the agent can simply rely on that and thus achieve the high asymptotic performance and relative computational cheapness of model-free RL.

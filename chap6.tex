@@ -1,4 +1,4 @@
-\chapter{Credit assignment in the brain}
+\chapter{Credit Assignment in the Brain}
 
 \subsection{Introduction}
 
@@ -70,7 +70,7 @@ A second approach is to use global neuromodulators as a part of a `three-factor'
 
 Finally, there is also a small but growing literature attempting to understand how and whether backpropagation can be directly implemented in the brain -- namely whether it is possible to design neural circuits to work around the key limitations proposed earlier. An important line of work tackles the weight transport problem. \citet{lillicrap2016random} demonstrate that in reality precise copying of the forward and backwards weights is not necessary, and in fact random fixed backward weights suffice due to the phenomenon of `feedback alignment' whereby the random feedback weights effectively force the forward weights to align with the backward ones to be able to learn. This approach can be improved by ensuring that the sign of the elements of the feedback weight matrix matches the sign of the forward weight matrix (potentially a more biologically plausible constraint than exact copying of values) \citep{liao2016important}, or else learning the backwards weights using an additional plasticity rule \citep{amit2019deep,akrout2019deep,millidge2020relaxing}. While the feedback alignment technique does not typically scale to deep architectures, as the feedback path becomes increasingly corrupted \citep{bartunov2018assessing}, an approach called direct feedback alignment (DFA) \citep{nokland2016direct}, whereby all layers are directly connected to the output layer through random backwards weights, has been shown to be able to scale to large deep architectures \citep{launay2019principled}, although not the usual convolutional neural networks used in vision. While an impressive result, DFA itself violates known neural connectivity constraints which feature reciprocal connectivity between regions and not every layer receiving direct backwards connections from the `output'. 
 
-Secondly, another line of work has focused on the algorithm of target-propagation \citep{bengio2015early,lee2015difference,} which is similar to backprop except that instead of providing gradients back to the weights at each layer it provides targets which can then be optimized locally. These targets are produced by mapping backwards the output of the network `nudged' towards the true target through an inverse mapping at each layer. The intuition, is that we want to find the targets which, if the lower layers had matched their activatiosn, would have produced a final output closer to the target. The past year has seen substantial advances in the theoretical analysis of target-prop, where it is now recognised to not approximate backprop, but instead be performing a hybrid form of Gauss-Newton optimization \citep{bengio2020deriving,meulemans2020theoretical}. While promising, large-scale studies on the stability and scalability of target-prop learning have not yet been done, although initial results are promising \citep{bartunov2018assessing}. Additionally, target-prop does not provide solutions to the weight transport problems (now complicated by the additional necessity of learning the backwards inverse weights), and the necessity of storing and comparing the forward and backward information across phases. The intuition of using the final loss function to compute layer-wise targets has also been applied, with variations, in other works \citep{ororbia2019biologically,ororbia2017learning,kaiser2020synaptic}.
+Secondly, another line of work has focused on the algorithm of target-propagation \citep{bengio2015early,lee2015difference} which is similar to backprop except that instead of providing gradients back to the weights at each layer it provides targets which can then be optimized locally. These targets are produced by mapping backwards the output of the network `nudged' towards the true target through an inverse mapping at each layer. The intuition, is that we want to find the targets which, if the lower layers had matched their activations, would have produced a final output closer to the target. The past year has seen substantial advances in the theoretical analysis of target-prop, where it is now recognised to not approximate backprop, but instead be performing a hybrid form of Gauss-Newton optimization \citep{bengio2020deriving,meulemans2020theoretical}. While promising, large-scale studies on the stability and scalability of target-prop learning have not yet been done, although initial results are promising \citep{bartunov2018assessing}. Additionally, target-prop does not provide solutions to the weight transport problems (now complicated by the additional necessity of learning the backwards inverse weights), and the necessity of storing and comparing the forward and backward information across phases. The intuition of using the final loss function to compute layer-wise targets has also been applied, with variations, in other works \citep{ororbia2019biologically,ororbia2017learning,kaiser2020synaptic}.
 
 Another approach is to use only local information at the synapses, but use a backwards phase which instead of being purely sequential is treated as a dynamical systems which undergoes multiple iterations. Using this approach, while it takes longer than a sequential backwards pass, also allows using only local information, since the information about the loss can be `leaked' slowly backwards using the dynamics over time instead of having to be explicitly transmitted backwards. This allows the brain to operate using the same dynamical rules at all times, in general, instead of sequential forwards and backwards transmission of information. One key example of such a framework is the algorithm of Equilibrium Propagation \citep{bengio2017stdp,scellier2017equilibrium,scellier2018extending,scellier2018generalization}, which uses two dynamical phases -- a \emph{free phase} where the dynamics of the system are allowed to evolve without any influence of the targets, and a \emph{clamped phase} in which the output units are held at a value nudged towards the targets, which destabilizes the free-phase equilibrium and instead sends the network towards a different clamped equilibrium state. It turns out that the difference between these two states corresponds closely to the gradients which would otherwise have been backpropagated through the network and can thus be used to adjust the synaptic weights \citep{scellier2017equilibrium}. Equilibrium propagation has been extensively tested on small datasets like MNIST and CIFAR, although it is not yet known how well the method scales. Additional problems with EP are its necessary use of two distinct backwards phases and, crucially, the storage of information (the equilibrium in the free-phase, throughout the entirety of the clamped phase before their subtraction to obtain the gradients. Another iterative algorithm which has been shown to approximate backprop is predictive coding \citep{whittington2017approximation}.
 
@@ -85,11 +85,10 @@ A final issue which undermines many of the proposed learning rules for both sequ
 Here we demonstrate that predictive coding can approximate backpropagation on arbitrary computation graphs. As we recall from chapter 5, predictive coding arises from a variational inference algorithm on the activations on each layer of the hierarchy, whereby the predictive coding update rules can as a gradient descent on the variational free energy $\mathcal{F}$. To showcase how this methodology extends to arbitrary graphs, we must define the variational inference problem to be solved on an arbitrary computation graph. First, we must make the notion of a computation graph explicit. 
 
 \begin{figure}[ht]
-\label{main_PCBP_schematic}
     \centering
     \includegraphics[width=\textwidth]{chapter_6_figures/pc_chain_schematic_new.pdf}
     \caption{Top: Backpropagation on a chain. Backprop proceeds backwawrds sequentially and  explicitly computes the gradient at each step on the chain. Bottom: Predictive coding on a chain.  Predictions, and prediction errors are updated in parallel using only local information.}
-    \label{fig:my_label}
+\label{main_PCBP_schematic}
 \end{figure}
 
 %copied
@@ -159,7 +158,7 @@ First, under the fixed prediction assumption, we can directly solve for the equi
 \end{align*}
 If we compare this to the recursive relationship inherent to reverse-mode AD (Equation \ref{reverse_mode_equation}), we can see that the prediction errors satisfy the same recursive relationship. Since this relationship is recursive, all that is needed for the prediction errors throughout the graph to converge to the backpropagated derivatives is for the prediction errors at the final layer to be equal to the output gradient: $\epsilon^*_L = \frac{\partial \mathcal{L}}{\partial \hat{v}_L}$. 
 %If this is the case, then due to the recursive structure, the prediction error dynamics converge to the backpropagated gradients at all nodes in the graph.
-To see this explicitly, consider a mean-squared-error loss function \footnote{While the mean-squared-error loss function fits most nicely with the Gaussian generative model, other loss functions can be used in practice. If the loss function can be represented as a log probability distribution, then the generative model can be amended to simply set the output distribution to that distribution. If not, then there is no fully consistent generative model (although all nodes except the output remain Gaussian), but the algorithm will still work in practice. See Figure \ref{PCBP_CNN_acc} for results for CNNs trained with a crossentropy loss.}. at the output layer $L = \frac{1}{2}(T - \hat{v}_L)^2$ with T as a vector of targets, and defining $\epsilon_L = T - \hat{v}_L$. We then consider the equilibrium value of the prediction error unit at a penultimate vertex $\epsilon_{L-1}$. By Equation \label{PCBP_error_equilibrium}, we can see that at equilibrium,
+To see this explicitly, consider a mean-squared-error loss function \footnote{While the mean-squared-error loss function fits most nicely with the Gaussian generative model, other loss functions can be used in practice. If the loss function can be represented as a log probability distribution, then the generative model can be amended to simply set the output distribution to that distribution. If not, then there is no fully consistent generative model (although all nodes except the output remain Gaussian), but the algorithm will still work in practice. See Figure \ref{PCBP_CNN_acc} for results for CNNs trained with a crossentropy loss.}. at the output layer $L = \frac{1}{2}(T - \hat{v}_L)^2$ with T as a vector of targets, and defining $\epsilon_L = T - \hat{v}_L$. We then consider the equilibrium value of the prediction error unit at a penultimate vertex $\epsilon_{L-1}$. By Equation \ref{PCBP_error_equilibrium}, we can see that at equilibrium,
 \begin{align*}
     \epsilon^*_{L-1} &= \epsilon^*_L \frac{\partial \hat{v}_L}{\partial v_{L-1}} = (T - \hat{v}_L^*)\frac{\partial \hat{v}_L}{\partial v_{L-1}} \numberthis
 \end{align*}
@@ -180,8 +179,6 @@ By a similar argument, it is apparent that the dynamics of the parameters $\thet
  To demonstrate that empirically that this approach works, we present a numerical test in the simple scalar case, where we use predictive coding to derive the gradients of an arbitrary, highly nonlinear test function $v_{L} = \tan(\sqrt{\theta v_0}) + \sin(v_0^2)$ where $\theta$ is an arbitrary parameter. For our tests, we set $v_0$ to 5 and $\theta$ to 2. The computation graph for this function is presented in Figure \ref{PCBP_numerical_results}. Although simple, this is a good test of predictive coding because the function is highly nonlinear, and its computation graph does not follow a simple layer structure but includes some branching. An arbitrary target of $T = 3$ was set at the output and the gradient of the loss $L= (v_L-T)^2$ with respect to the input $v_0$ was computed by predictive coding. We show (Figure \ref{PCBP_numerical_results}) that the predictive coding optimisation rapidly converges to the exact numerical gradients computed by automatic differentiation, and that moreover this optimization is very robust and can handle even exceptionally high learning rates (up to 0.5) without divergence. 
 
  \begin{figure}
- \label{PCBP_numerical_results}
-\vspace{-1.5cm}
 \begin{subfigure}{\linewidth}
 \centering
 \includegraphics[scale=0.15]{chapter_6_figures/pc_schematic.pdf}
@@ -195,6 +192,8 @@ By a similar argument, it is apparent that the dynamics of the parameters $\thet
 \includegraphics[scale=0.25]{chapter_6_figures/numerics_proper_log_divergence.jpg}
 \end{subfigure}\\[1ex]
 \caption{Top: The computation graph of the nonlinear test function $v_{L} = \tan(\sqrt{\theta v_0}) + \sin(v_0^2)$. Bottom: graphs of the log mean divergence from the true gradient and the divergence for different learning rates. Convergence to the exact gradients is exponential and robust to high learning rates.}
+
+ \label{PCBP_numerical_results}
 \end{figure} \vspace{-0.2cm}
 
 Secondly, we wish to show empirically that this approach can be used to train deep neural network architectures, of the kind used in machine learning, up to high levels of performance equivalent to those trained with backprop. First, we demonstrate a predictive coding CNN model. Convolutional neural networks have been a cornerstone of machine learning since the pioneering demonstrations of their power on ImageNet by \citep{krizhevsky2012imagenet}, and are still widely used as state of the art models for image processing. 
@@ -231,7 +230,6 @@ First, we compare the test and training accuracy, as well as training loss plots
 
 
  \begin{figure*}
-\label{training_divergence}
         \centering
         \begin{subfigure}[b]{0.475\textwidth}
             \centering
@@ -261,7 +259,8 @@ First, we compare the test and training accuracy, as well as training loss plots
             {{\small FC Layer 2}}    
         \end{subfigure}
         \caption{\small Mean divergence between the true numerical and predictive coding backprops over the course of training. In general, the divergence appeared to follow a largely random walk pattern, and was generally neglible. Importantly, the divergence did not grow over time throughout training, implying that errors from slightly incorrect gradients did not appear to compound.} 
-        \label{fig:mean and std of nets}
+       
+\label{training_divergence}
     \end{figure*}
     
 Importantly, we found that the divergence between the true and predictive coding gradients was extremely small, and remained approximately constant throughout training suggesting that predictive coding networks do not suffer from accumulating errors in their gradient approximation process. Importantly, to achieve this level of convergence required 100 backwards iterations using an inference learning rate of 0.1. This means that the predictive coding has an approximately 100x computational overhead compared to backprop -- largely rendering it uncompetitive for direct competition in serial computers. Nevertheless, this choice of 100 iterations is on the high end of what is necessary, since we are primarily concerned with showing the asymptotic equivalence, and in reality the number of iterations required may be substantially lower. Additionally, predictive coding is a fully parallel algorithm unlike backprop, which must be implemented sequentially and is a better fit for the highly parallel neural circuitry.
@@ -269,7 +268,6 @@ Importantly, we found that the divergence between the true and predictive coding
 It is also important to note that while predictive coding `naturally' uses the mean-squared error loss -- so that the output error is a standard prediction error, other loss functions as possible, such as the widely used cross-entropy loss. Predictive coding can be straightforwardly extended to cover other loss functions by simply replacing the final prediction error $\epsilon_L$ with the gradient of the loss function with respect to the outputs.  Here we demonstrate that predictive coding with a multi-class cross entropy loss also performs equivalently to the network trained with backprop on the CIFAR and SVHN datasets.
 
  \begin{figure*}
-        \label{PCBP_CNN_acc}
         \centering
         \begin{subfigure}[b]{0.475\textwidth}
             \centering
@@ -299,7 +297,8 @@ It is also important to note that while predictive coding `naturally' uses the m
             {{\small CIFAR test accuracy}}    
         \end{subfigure}
         \caption{\small Training and test accuracies of the CNN network on the SVHN and CIFAR datasets using the cross-entropy loss. As can be seen performance remains very close to backprop, thus demonstrating that our predictive coding algorithm can be used with different loss functions, not just mean-squared-error.} 
-        \label{fig:mean and std of nets}
+       
+        \label{PCBP_CNN_acc}
     \end{figure*}
 
 \subsection{RNN and LSTM}
@@ -339,7 +338,6 @@ We first present the training and test accuracy for the backprop RNNs, averaged 
 
 \begin{figure}[ht]
 \vspace{-0.3cm}
-\label{pc_rnn_lstm_results_figure}
 \hspace{-0.6cm}
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -354,28 +352,29 @@ We first present the training and test accuracy for the backprop RNNs, averaged 
   %\caption{CIFAR10 Training Accuracy}
 \end{subfigure}
 \caption{Test accuracy plots for the Predictive Coding and Backprop RNN and LSTM on their respective tasks, averaged over 5 seeds. Performance is again indistinguishable from backprop.}
-\label{fig:A}
+
+\label{pc_rnn_lstm_results_figure}
 \vspace{-0.3cm}
 \end{figure}
 
 Additionally, The training loss for the predictive coding and backprop RNNs, averaged over 5 seeds is presented below (Figure \ref{rnn_losses}).
 
 \begin{figure}[ht]
-\label{rnn_losses}
   \centering
   % include first image
   \includegraphics[width=.7\linewidth]{chapter_6_figures/RNN_Losses_super_prelim_6.jpg}  
 \caption{Training losses for the predictive coding and backprop RNN. As expected, they are effectively identical.}
+
+\label{rnn_losses}
 \end{figure}
 \subsubsection{LSTM}
-\label{PC_LSTM}
-
 \begin{figure}[ht]
-\label{backprop_lstm}
   \centering
   % include first image
   \includegraphics[width=1\linewidth]{chapter_6_figures/backprop_LSTM.pdf}  
 \caption{Computation graph and backprop learning rules for a single LSTM cell.}
+
+\label{PC_LSTM}
 \end{figure}
 Unlike the other two models, the LSTM possesses a complex and branching internal computation graph, and is thus a good opportunity to make explicit the predictive coding `recipe' for approximating backprop on arbitrary computation graphs. The computation graph for a single LSTM cell is shown (with backprop updates) in Figure \ref{pc_lstm}. Prediction for the LSTM occurs by simply rolling forward a copy of the LSTM cell for each timestep. The LSTM cell receives its hidden state $h_t$ and cell state $c_t$ from the previous timestep. During training we compute derivatives on the unrolled computation graph and receive backwards derivatives (or prediction errors) from the LSTM cell at time $t+1$.
 
@@ -419,25 +418,25 @@ The recipe to convert this computation graph into a predictive coding algorithm 
     \epsilon_{10} &= v_{10} - \hat{v}_{10}
 \end{align*}
 
-During inference, the inputs $h_t$,$x_t$ and the output $y_t$ are fixed. The vertices and then the prediction errors are updated. This recipe is straightforward and can easily be extended to other more complex machine learning architectures. The full augmented computation graph, including the vertex update rules, is presented in Figure \ref{pc_LSTM}.
+During inference, the inputs $h_t$,$x_t$ and the output $y_t$ are fixed. The vertices and then the prediction errors are updated. This recipe is straightforward and can easily be extended to other more complex machine learning architectures. The full augmented computation graph, including the vertex update rules, is presented in Figure \ref{PC_LSTM}.
 
 
 \begin{figure}%[ht]
-\label{pc_lstm}
   \centering
   % include first image
   \includegraphics[width=1\linewidth]{chapter_6_figures/pc_LSTM.pdf}  
 \caption{The LSTM cell computation graph augmented with error units, evincing the connectivity scheme of the predictive coding algorithm.}
+\label{pc_lstm}
 \end{figure}
 
 For the LSTM we also observed a close correspondence between the performance (in terms of training and test accuracy) between the predictive coding and backpropagation networks, thus demonstrating that predictive coding can converge to the exact backprop gradients even on exceptionally deep and complex computation graphs such as the LSTM
 
 \begin{figure}[ht]
-\label{sequence_length_effect}
   \centering
   % include first image
   \includegraphics[width=0.7\linewidth]{chapter_6_figures/LSTM_Losses_super_prelim_6.jpg}  
 \caption{Training losses for the predictive coding and backprop LSTMs averaged over 5 seeds. The performance of the two training methods is effectively equivalent.}
+\label{LSTM_losses}
 \end{figure}
 
 Importantly, we observed rapid convergence to the exact backprop gradients even in the case of very deep computation graphs (as is an unrolled LSTM with a sequence length of 100). Although convergence was slower than was the case for CNNs or lesser sequence lengths, it was still straightforward to achieve convergence to the exact numerical gradients with sufficient iterations.
@@ -447,30 +446,31 @@ Below we plot the mean divergence between the predictive coding and true numeric
 We also plot the number of iterations required to reach a given convergence threshold (here taken to be 0.005) as a function of sequence length (Figure \ref{num_iterations_to_converge}). We see that the number of iterations required increases sublinearly with the sequence length, and likely asymptotes at about 300 iterations. Although this is a lot of iterations, the sublinear convergence nevertheless shows that the method can scale to even extremely deep graphs.
 
 \begin{figure}[ht]
-\label{sequence_length_effect}
   \centering
   % include first image
   \includegraphics[width=.9\linewidth]{chapter_6_figures/lstm_seqlen_divergences.jpg}  
 \caption{Divergence between predictive coding and numerical gradients as a function of sequence length.}
+\label{sequence_length_effect}
+
 \end{figure}
 
 \begin{figure}[ht]
-\label{num_iterations_to_converge}
   \centering
   % include first image
   \includegraphics[width=.9\linewidth]{chapter_6_figures/convergence_num_iterations_comparison.jpg}  
 \caption{Number of iterations to reach convergence threshold as a function of sequence length.}
+\label{num_iterations_to_converge}
 \end{figure}
 
 Our architecture consisted of a single LSTM layer (more complex architectures would consist of multiple stacked LSTM layers).
 The LSTM was trained on a next-character character-level prediction task. The dataset was the full works of Shakespeare, downloadable from Tensorflow. The text was shuffled and split into sequences of 50 characters, which were fed to the LSTM one character at a time. The LSTM was trained then to predict the next character, so as to ultimately be able to generate text. The characters were presented as one-hot-encoded vectors. The LSTM had a hidden size and a cell-size of 1056 units. A minibatch size of 64 was used and a weight learning rate of 0.0001 was used for both predictive coding and backprop networks. To achieve sufficient numerical convergence to the correct gradient, we used 200 variational iterations with an inference learning rate of 0.1. This rendered the predictive LSTM approximately 200x as costly as the backprop LSTM to run. A graph of the LSTM training loss for both predictive coding and backprop LSTMs, averaged over 5 random seeds, can be found below (Figure \ref{pcbp_lstm_losses}). 
 
 \begin{figure}[ht]
-\label{pcbp_lstm_losses}
   \centering
   % include first image
   \includegraphics[width=0.7\linewidth]{chapter_6_figures/LSTM_Losses_super_prelim_6.jpg}  
 \caption{Training losses for the predictive coding and backprop LSTMs averaged over 5 seeds. The performance of the two training methods is effectively equivalent.}
+\label{pcbp_lstm_losses}
 \end{figure}
 
 \section{Interim Discussion}
@@ -563,7 +563,6 @@ Upon convergence, the activations of each layer are precisely equal the backprop
 We first demonstrate that our algorithm can train a deep neural network with equal performance to backprop. For training, we utilised the MNIST and Fashion-MNIST \citep{xiao2017online} datasets. The MNIST dataset consists of 60000 training and 10000 test 28x28 images of handwritten digits, while the Fashion-MNIST dataset consists of 60000 training and 10000 test 28x28 images of clothing items. The Fashion-MNIST dataset is designed to be identical in shape and size to MNIST while being harder to solve. We used a 4-layer fully-connected multi-layer perceptron (MLP) with rectified-linear activation functions and a linear output layer. The layers consisted of 300, 300, 100, and 10 neurons respectively. In the dynamical relaxation phase, we integrate  Equation \ref{AR_main_equation} with a simple first-order Euler integration scheme. ${x^l}^{t+1} = {x^l}^t - \eta_x \frac{dx^l}{dt}$ where $\eta_x$ was a learning rate which was set to $0.1$. The relaxation phase lasted for 100 iterations, which we found sufficient to  closely approximate the numerical backprop gradients. After the relaxation phase was complete, the weights were updated using the standard stochastic gradient descent opteimizer, with a learning rate of 0.0005. The weights were initialized as draws from a Gaussian distribution with a mean of 0 and a variance of 0.05.  Hyperparameter values were chosen based off initial intuition and were not found using a grid-search. 
 The AR algorithm was applied to each minibatch of 64 digits sequentially. The network was trained with the mean-squared-error loss.
 \begin{figure}
-\label{AR_mnist_results}
 \centering
 \subfloat[MNIST train accuracy]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_AR_vs_Backprop_accuracies.jpg}}\hfil
 \subfloat[MNIST test accuracy]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_AR_vs_Backprop_test accuracies.jpg}}\hfil 
@@ -572,7 +571,8 @@ The AR algorithm was applied to each minibatch of 64 digits sequentially. The ne
 \subfloat[Fashion train accuracy]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_AR_vs_Backprop_accuracies.jpg}}\hfil
 \subfloat[Fashion test accuracy]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_AR_vs_Backprop_test accuracies.jpg}}\hfil AR/
 \subfloat[Fashion gradient angle]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_AR_Gradient_Angle_grad_angle.jpg}}
-\caption{Train and test accuracy and gradient angle (cosine similarity) for AR vs backprop for MNIST and Fashion-MNIST datasets.}\label{figure}
+\caption{Train and test accuracy and gradient angle (cosine similarity) for AR vs backprop for MNIST and Fashion-MNIST datasets.}
+\label{AR_mnist_results}
 \end{figure}
 
 In Figure \ref{AR_mnist_results} we show that the training and test performance of the network trained with activation-relaxation is nearly identical to that of the network trained with backpropagation, thus demonstrating that our algorithm can correctly perform credit assignment in deep neural networks with only local learning rules. We also empirically investigate the angle between the AR-computed gradient updates and the true backpropagated updates. The gradient angle $\mathcal{A}$ was computed using the cosine similarity metric $\mathcal{A}(\nabla_\theta) =  \cos^{-1} \frac{\nabla_\theta^T \nabla_\theta^*}{||\nabla_\theta|| ||\nabla_\theta^*}$, where $\nabla_\theta$ was the AR-computed gradients and $\nabla_\theta^*$ were the backprop gradients. To handle the fact that we had gradient matrices while the cosine similarity metric only applies to vectors, following \citep{lillicrap2016random}, we simply flattened the gradient matrices into vectors before performing the computation. We see that the updates computed by AR are very close in angle to the backprop updates (within under 10 degrees), although the angle increases slightly over the course of training. The convergence in training and test accuracies between the AR and backprop shows that this slight difference in gradient angle is not enough to impede effective credit assignment and learning in AR. In Appendix C, we take a step towards demonstrating the scalability of this algorithm, by showing preliminary results that indicate that AR, including with the biologically plausible simplifications introduced below, can scale to deeper CNN architectures and more challenging classification tasks.
@@ -594,7 +594,6 @@ Then, following our work on relaxed preditive coding in Chapter 5, we learn thes
 The backwards weights were initialized as draws from a 0 mean, 0.05 variance Gaussian. In Figure \ref{AR_results_figures} we show that strong performance is obtained with the learnt backwards weights. We found that using random feedback weights without learning (i.e. feedback alignment), typically converged to a lower accuracy and had a tendency to diverge, which may be due to a simple Gaussian weight initialization used here. Nevertheless, when the backwards weights are learnt, we find that the algorithm is stable and can obtain performance comparable with using the exact weight transposes (Figure \ref{AR_results_figures}).  This is a very strong and encouraging result. First that this learning rule enables performance with exact weight transposes is impressive, since it implies that the Hebbian update rule on the backwards weights works and is highly effective, even early on in training. Secondly, the generalizability of this remedy for weight transport, from predictive coding networks, deep neural networks \citep{amit2019deep,akrout2019deep} with backprop, and now AR suggests that the backwards weights may be able to be independent and robustly learned from scratch in the brain, thus largely resolving the weight transport problem altogether.
 
 \begin{figure}
-\label{AR_results_figures}
 \centering
 \subfloat[MNIST backwards weights]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_Backwards_Weights_test accuracies.jpg}}\hfil
 \subfloat[MNIST nonlinear derivatives]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_No_Nonlinear_Derivative_test accuracies.jpg}}\hfil 
@@ -603,7 +602,8 @@ The backwards weights were initialized as draws from a 0 mean, 0.05 variance Gau
 \subfloat[Fashion backwards weights]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_Backwards_Weights_test accuracies.jpg}}\hfil
 \subfloat[Fashion nonlinear derivatives]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_No_Nonlinear_Derivative_test accuracies.jpg}}\hfil 
 \subfloat[Fashion combined]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/fashion_Combined_Algorithm_test accuracies.jpg}} 
-\caption{Train and test accuracy and gradient angle (cosine similarity) for AR vs backprop for MNIST and Fashion-MNIST datasets.}\label{figure}
+\caption{Train and test accuracy and gradient angle (cosine similarity) for AR vs backprop for MNIST and Fashion-MNIST datasets.}
+\label{AR_results_figures}
 \end{figure}
 
 We additionally  plot the angle between the AR with learnable backwards weights and the true BP gradients (Figure \ref{AR_grad_angle_figure}). The angle starts out very large (about 70 degrees) since the backwards weights are randomly initialized but then rapidly decreases to about 30 degrees as the backwards weights are learnt, which seems empirically to be sufficient to enable strong learning performance. 
@@ -619,13 +619,13 @@ By explicitly plotting the angle (Figure \ref{AR_grad_angle_figure}), we see tha
 
 
 \begin{figure}
-\label{AR_grad_angle_figure}
 % relaxations gradient angle graph
 \centering
 \subfloat[Backwards weight angle]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_Backwards_Weights_Gradient_Angle_grad_angle.jpg}}\hfil
 \subfloat[Nonlinear derivatives angle]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_No_Nonlinear_Derivative_Gradient_Angle_grad_angle.jpg}}\hfil 
 \subfloat[Combined angls]{\includegraphics[width=0.3\linewidth]{chapter_6_figures/AR/mnist_Combined_Algorithm_Gradient_Angle_grad_angle.jpg}} 
-\caption{Angle between the AR and backprop updates in the learnable backwards weights, no nonlinear derivatives, and the combined conditions.}\label{figure}
+\caption{Angle between the AR and backprop updates in the learnable backwards weights, no nonlinear derivatives, and the combined conditions.}
+\label{AR_grad_angle_figure}
 \end{figure}
 
 Moreover, we can \emph{combine} these two changes of the algorithm such that there is both no nonlinear derivative and also learnable backwards weights. Perhaps surprisingly, when we do this  we retain equivalent performance to the full AR algorithm (see Figure \ref{AR_results_figures}), and therefore a valid approximation to backprop in an extremely simple and biologically plausible form. The activation update equation for the fully simplified algorithm is: 
@@ -644,7 +644,6 @@ We call this the \emph{frozen feedforward pass} assumption, and it is very close
 
 We evaluate whether the nonlinear derivative term can be unfrozen so that it uses the current value of the activity in a.) the function derivative $f'$ in Equation \ref{AR_main_equation}, b.) in the weight update equation (Equation \ref{BP_weights_equation}), and c.) we investigate whether the activation value itself can be replaced in the weight update equation.
 \begin{figure}[htb]
-\label{AR_no_frozen_pass}
 \centering
   \begin{subfigure}[b]{0.4\linewidth}
     \centering
@@ -668,7 +667,8 @@ We evaluate whether the nonlinear derivative term can be unfrozen so that it use
     \includegraphics[width=0.75\linewidth]{chapter_6_figures/AR/mnist_tanh_Current_x_weights_test_accuracies_prelim_2.jpg} 
     \caption{MNIST current x weight update} 
   \end{subfigure} 
-  \caption{Assessing whether the frozen feedforward pass assumption can be relaxed. We show the resulting performance (test accuracy) against baseline of relaxing this assumption on the MNIST dataset. See Appendix B for the Fashion-MNIST results. All results averaged over 10 seeds.} \vspace{-0.2cm}
+  \caption{Assessing whether the frozen feedforward pass assumption can be relaxed. We show the resulting performance (test accuracy) against baseline of relaxing this assumption on the MNIST dataset. See Appendix B for the Fashion-MNIST results. All results averaged over 10 seeds.}
+  \label{AR_no_frozen_pass}
 \end{figure} 
 
 In Figure \ref{AR_no_frozen_pass}, we see that the frozen feedforward pass assumption can be relaxed in the case of the nonlinear derivatives for both the AR update and the weight update equation. However, relaxing it in the case of the weight update equation destroys performance. This means that ultimately, a direct implementation of AR in biological circuitry would require neurons to store the feedforward pass value of their own activations. 
@@ -706,7 +706,6 @@ Our CNN consisted of a convolutional layer followed by a max-pooling layer, foll
   \caption{Both no nonlinear derivative}
 \end{subfigure}
 %\caption{}
-\label{fig:images}
 \end{figure}
 
 We see that the simplifications also scale to the CNN for the SVHN dataset, although, interestingly, performance is degraded on this dataset when both convolutional and FC nonlinearities are dropped. However, since this does not occur in the other, more challenging, CIFAR datasets, we take this result to be an anomaly.
@@ -787,7 +786,7 @@ One additional and important drawback of the AR algorithm is that it requires ke
 This issue of memory is also closely related to the core computational properties of reverse-mode AD. Specifically, that it requires storage in memory of all intermediate activations in the forward pass. This means that the memory issue also closely applies to sequential backward algorithms such as target-propagation and, indeed, backprop itself. The fundamental fact is that backwards pass can only take place \emph{after} the forward pass is complete, and that it requires knowledge of forward pass activities. This fact cannot be ignored or cleverly wished away by any algorithm but must simply be addressed. If the brain is performing reverse-mode AD, then it simply must have some way to store, implicitly or explicitly, the feedforward pass values. The question then becomes how can this be done in the brain? Some possibilities are multiplexing using the brain's own intrinsic rhythms \citep{buzsaki2006rhythms}, or some kind of special parallel class or neurons to maintain activity explicitly \citep{o1999biologically}, or else storage at the synaptic level through mechanisms like eligibility traces \citep{bellec2020solution}. While we here remain ambiguous on the means by which such storage is achieved, we have reached a point of conceptual clarity in knowing that there \emph{must be storage}. The only question is how.
 % I'll discuss the general issues with the fixed prediction assumptions etc here
 
-\section{Three-factor Learning Rules and a Direct Implementation}
+\section{Three-Factor Learning Rules and a Direct Implementation}
 
 After having gone through several iterative algorithms for approximating the backpropagation of error algorithm, it is worth taking a step back to understand what has been shown and what is truly necessary. Here, we argue that in fact, despite strong claims that backprop is biologically implausible, in fact an actual implementation of backprop in the brain could be surprisingly simple and biologically plausible. Moreover, that many of the algorithms, including the iterative algorithms previously, may simply be complicating matters. The material in this section is speculative and early stage, and will be investigated further in future work.
 
@@ -817,11 +816,10 @@ For the vast majority of layers, these expressions are the same up to a re-brack
 Now we note the crucial point, that the only biological implausibilities in these learning rules is the necessity to have the adjoint value present at the synapse for the weight update rule, since it is just the multiplication of the adjoint and the presynaptic activation. The recursive computation of the adjoint itself (Equation \ref{reverse_mode_equation} is relatively plausible, since the only difficulty is the nonlinear derivative term $f'(x)$ which now is only the derivative of the activation function applied to the pre-synaptic input. Importantly, for spiking neurons, this derivative is trivial as is essentially consists of a spike when the neuron fires and not when it doesn't. As such, this rule effectively says that the adjoint should only be updated when there is presynaptic firing. Putting this all together, we can imagine implementing this in the brain in a fairly direct forward-backward scheme as in Figure \ref{continuous_bp_figure}
 
 \begin{figure}
-\label{continuous_bp_figure}
     \centering
     \includegraphics[width=\linewidth]{chapter_6_figures/continuous_backprop_idea_v2.pdf}
     \caption{Potential schematic for a direct implementation of backprop in the brain. All that is necessary for this to be plausible is three-factor learning rules.}
-    \label{fig:my_label}
+\label{continuous_bp_figure}
 \end{figure}
 
 Specifically, if we assume that the weight transport problem can be solved with independently learnable backwards weights, then the recursion for the adjoint becomes simply,
