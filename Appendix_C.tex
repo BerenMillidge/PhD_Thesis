@@ -1,0 +1,29 @@
+
+\chapter{Appendix C: Predictive Coding Under the Laplace Approximation}
+
+In the main derivation in Chapter 3 of the variational free energy $\mathcal{F}$, we used the assumption that the variational density is a dirac delta function: $q(x | o; \mu) = \delta(x - \mu)$. However, the majority of derivations, including the original derivations in \citep{friston2005theory} instead applied the Laplace approximation to the variational distribution $q$. This approximation defines $q$ to be a Gaussian distribution with a variance which is a function of the mean $\mu$:  $q(x | o; \mu) = \mathcal{N}(x;\mu, \sigma(\mu))$. Notationally, it is important to distinguish between the generative model $\Sigma$, and the variational distribution $\sigma$. Here we use the lower-case $\sigma$ to denote the parameter of the variational distribution. The lower-case is not meant to imply it is necessarily scalar. As we shall see, the optimal $\sigma$ will be become the inverse-Hessian of the free energy at the mode. 
+
+Intuitively, this is because the curvature at the mode of a Gaussian distribution gives a good indication of the variance of the Gaussian, since a Gaussian with high curvature at the mode (i.e. the mean) will be highly peaked and thus have a small variance, while a Gaussian with low curvature will be broad, and thus have a large variance.  While our derivation using a dirac-delta approximation and the standard derivation using a Laplace approximation obviously differ, they ultimately arrive at the same expression for the variational free energy $\mathcal{F}$. This is because both approximations effectively remove the variational variances from consideration and only use the variational mean in practice. Under the Laplace approximation, the variational coveriance has an analytical optimal form and thus does not need to be optimized, and plays no real role in the optimization process for the $\mu$s either. We chose to present our derivation using dirac-deltas in the interests of simplicity, since as we shall see the Laplace approximation derivation is somewhat more involved.
+
+To begin, we return to the standard energy function in multilayer case, this time under the assuption the Laplace approximation.
+
+\begin{align*}
+    \mathcal{F} &= \sum_{i=}^L \underbrace{\mathbb{E}_{q(x | o;\mu)}\big[ \ln p( x_i | x_{i+1}) \big]}_{\text{Energy}} + \underbrace{\mathbb{E}_{q(x | o;\mu)} \big[ \ln q(x | o ;\mu) \big]}_{\text{Entropy}} \\
+    &= \sum_{i=}^L \mathbb{E}_{\mathcal{N}(x;\mu, \sigma(\mu))}\big[ \ln \mathcal{N}(x_i;f(\mu_{i+1}, \Sigma(\mu))) \big] - \ln 2 \pi \sigma_i \numberthis
+\end{align*}
+Where we have used the analytical result that the entropy of a gaussian distribution $\mathbb{H}[\mathcal{N}] = \ln 2 \pi \sigma$.
+Then, we apply a Taylor expansion around $x_i = \mu_i$ to each element in the sum,
+\begin{align*}
+    \mathcal{F} &\propto \sum_{i=}^L \mathbb{E}_q \big[ \ln p(\mu_i | \mu_{i+1}) \big] + \mathbb{E}_q \big[\frac{\partial \ln p(x_i | x{i+1})}{\partial x_i}(x_i - \mu_i) \big] + \mathbb{E}_q \big[\frac{\partial^2 \ln p(x_i | x{i+1})}{\partial x_i^2}(x_i - \mu_i)^2 \big]  - \ln 2 \pi \sigma_i\\
+    &= \sum_{i=0}^L \ln p(\mu_i | \mu_{i+1})  +  \frac{\partial^2 \ln p(x_i | x{i+1})}{\partial x_i^2}\sigma_i - \ln 2 \pi \sigma_i \numberthis
+\end{align*}
+Where in the second line, we have used the fact that $\mathbb{E}_q \big[x_i - \mu_i \big] = \mathbb{E}_q \big[x_i] - \mu_i = \mu_i - \mu_i = 0$ and that $\mathbb{E}_q \big[ (x_i - \mu_i)^2] = \Sigma_i$, which is that the expected squared residual simply is the variance. We also drop the expectation around the first term, since as a function only of $\mu$ and $\mu_{i+1}$, it is no longer a function of $x_i$ which is the variable the expectation is under. We can then differentiate this expression with respect to $\sigma_i$ and solve for 0 to obtain the optimal variance.
+\begin{align*}
+    \frac{\partial \mathcal{F}}{\partial \sigma_i} &= \frac{\partial^2 \ln p(x_i | x{i+1})}{\partial x_i^2} - \sigma_i^{-1} \\
+    & \frac{\partial \mathcal{F}}{\partial \sigma_i} = 0 \implies \sigma_i = {\frac{\partial^2 \ln p(x_i | x{i+1})}{\partial x_i^2}}^{-1} \numberthis
+\end{align*}
+Given this analytical result, there is no point optimizing $\mathcal{F}$ with respect to the variational variances $\sigma_i$, so our objective simply becomes,
+\begin{align*}
+    \mathcal{F} = \sum_{i=0}^L \ln p(\mu_i | \mu_{i+1}) \numberthis
+\end{align*}
+which is exactly the same result as obtained through the dirac delta approximation.

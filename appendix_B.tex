@@ -1,0 +1,41 @@
+\chapter{Appendix B: Equations of the LSTM cell}
+
+The equations that specify the computation graph of the LSTM cell are as follows.
+\begin{align*}
+    v_1 &= h_t \oplus x_t \\
+    v_2 &= \sigma(\theta_i v_1) \\ 
+    v_3 &= c_t v_2 \\ 
+    v_4 &= \sigma (\theta_{inp} v_1) \\ 
+    v_5 &= \tanh(\theta_c v_1) \\ 
+    v_6 &= v_4 v_5 \\ 
+    v_7 &= v_3 + v_6 \\ 
+    v_8 &= \sigma (\theta_o v_1)  \\ 
+    v_9 &= \tanh(v_7)\\
+    v_{10} &= v_8 v_9 \\
+    y &= \sigma(\theta_y v_{10})
+\end{align*}
+
+The recipe to convert this computation graph into a predictive coding algorithm is straightforward. We first rewire the connectivity so that the predictions are set to the forward functions of their parents. We then compute the errors between the vertices and the predictions. 
+\begin{align*}
+    \hat{v}_1 &= h_t \oplus x_t \\
+    \hat{v}_2 &= \sigma(\theta_i v_1) \\ 
+    \hat{v}_3 &= c_t v_2 \\ 
+    \hat{v}_4 &= \sigma (\theta_{inp} v_1) \\ 
+    \hat{v}_5 &= \tanh(\theta_c v_1) \\ 
+    \hat{v}_6 &= v_4 v_5 \\ 
+    \hat{v}_7 &= v_3 + v_6 \\ 
+    \hat{v} &= \sigma (\theta_o v_1)  \\ 
+    \hat{v}_9 &= \tanh(v_7)\\
+    \hat{v}_{10} &= v_8 v_9 \\
+    \hat{v}_y &= \sigma(\theta_y v_{10}) \\
+    \epsilon_1 &= v_1 - \hat{v}_1 \\
+    \epsilon_2 &= v_2 - \hat{v}_2 \\
+    \epsilon_3 &= v_3 - \hat{v}_3 \\
+    \epsilon_4 &= v_4 - \hat{v}_4 \\
+    \epsilon_5 &= v_5 - \hat{v}_5 \\
+    \epsilon_6 &= v_6 - \hat{v}_6 \\
+    \epsilon_7 &= v_7 - \hat{v}_7 \\
+    \epsilon_8 &= v_8 - \hat{v}_8 \\
+    \epsilon_9 &= v_9 - \hat{v}_9 \\
+    \epsilon_{10} &= v_{10} - \hat{v}_{10}
+\end{align*}

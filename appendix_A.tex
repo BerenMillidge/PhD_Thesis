@@ -3,7 +3,7 @@
 In this appendix we derive the Kalman filtering equations directly from Bayes rule. The first step is to derive the projected covariance,
 \begin{align}
     \E[\hat{x}_{t+1}\hat{x}_{t+1}^T] &= \E[(Ax + Bu + \omega)(Ax + Bu + \omega)^T] \\
-    &= \E[Ax x^TA^T] + \E[Ax u^TB^T] + \E[Ax\omega^T] + \E[Bu x^TA^T] + \E[Bu\omega^T] + \E[\omega_x^T A^T] \\ &+ \E[\omega U^TB^T] + \E[\omega\omega^T] \\
+    &= \E[Ax x^TA^T] + \E[Ax u^TB^T] + \E[Ax\omega^T] + \E[Bu x^TA^T] + \E[Bu\omega^T] + \E[\omega_x^T A^T] \\ &+ \E[\omega u^TB^T] + \E[\omega\omega^T] \\
     &= A \E[xx^T]A^T + \E[\omega\omega^T] \\
     &= A\Sigma_x(t)A^T + \Sigma_\omega 
 \end{align}
